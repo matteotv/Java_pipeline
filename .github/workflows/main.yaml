@@ -76,10 +76,17 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
           
       # Runs a set of commands using the runners shell
-      - name: build java application 
+      - name: Unit-test java application 
         run: |
              mvn clean verify
              mvn test -Pfunctional-test
+             
+      - name: Integration-test java application 
+        run: |
+              mvn clean package -DskipTests -P "spring-native,build-native-image"
+              .\target\com.example.demo.demoapplication.exe &
+              sleep 10
+              mvn test -Pfunctional-test
         
     
 
