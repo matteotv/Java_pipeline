@@ -81,7 +81,6 @@ jobs:
       - name: Unit-test java application 
         run: |
              mvn clean verify
-             mvn test -Pfunctional-test
              
       - name: Integration-test java application 
         run: |
