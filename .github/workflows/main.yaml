@@ -25,16 +25,21 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       
-      
-      - name: Setup Java Development Kits built by Oracle
-        uses: oracle-actions/setup-java@v1.1.0
+      - name: Set up JDK
+        uses: actions/setup-java@v2
         with:
-          release: 17
-      
+          distribution: 'zulu'
+          java-version: 17
 
+      - name: Set up MongoDb
+        run: |
+          docker-compose up -d mongodb
+          docker ps -a
+      
       # Runs a set of commands using the runners shell
       - name: build java application 
-        run: mvn clean package -DskipTests -Pspring-native,build-native-image
+        run: mvn clean verify
+        
     
 
 
