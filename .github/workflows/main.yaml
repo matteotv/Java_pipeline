@@ -47,8 +47,43 @@ jobs:
       - name: build java application 
         run: mvn clean verify
         
-  test:
+  build-docker-image:
     needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build Docker Image
+        run: mvn clean spring-boot:build-image -DskipTests -Pspring-native,build-docker-image
+
+      - name: Run App in Docker
+        run: |
+          docker-compose up -d
+          sleep 10
+          docker ps -a
+      - name: Run FunctionalTests
+        run: |
+          mvn test -Pfunctional-test
+        
+  test:
+    needs: build-docker-image
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
