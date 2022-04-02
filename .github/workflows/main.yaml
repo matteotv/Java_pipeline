@@ -35,7 +35,14 @@ jobs:
         run: |
           docker-compose up -d mongodb
           docker ps -a
-      
+          
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+          
       # Runs a set of commands using the runners shell
       - name: build java application 
         run: mvn clean verify
