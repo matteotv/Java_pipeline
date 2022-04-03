@@ -82,7 +82,7 @@ jobs:
         run: |
           mvn test -Pfunctional-test
         
-  test:
+  IntegrationTest:
     needs: build-docker-image
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
           docker-compose up -d mongodb
           docker ps -a
              
-      - name: Integration-test java application 
+      - name: Integration test java application 
         run: |
               mvn clean package -DskipTests -Pspring-native,build-native-image
               ./target/com.example.demo.demoapplication &
@@ -117,6 +117,34 @@ jobs:
         with:
           name: demoapplication-ubuntu-latest
           path: target/com.example.demo.demoapplication*  
+          
+          
+  deploy:
+    needs: IntegrationTest
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1.2.1
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: lambdatest.zip
+          path: output
+
+      - name: provision Lambda
+        run: | 
+              cp ./output/lambdatest.zip ./terraform/lambdatest.zip
+              cd terraform 
+              terraform init
+              export TF_VAR_access_key="${{secrets.ACCESS_KEY}}"
+              export TF_VAR_secret_key="${{secrets.SECRET_KEY}}"
+              terraform apply --auto-approve
+              sleep 10
+              terraform destroy --auto-approve 
         
     
 
