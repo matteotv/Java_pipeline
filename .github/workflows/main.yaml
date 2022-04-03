@@ -132,12 +132,15 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: lambdatest.zip
+          name: demoapplication-ubuntu-latest
           path: output
+          
+      - name: Zip output
+        run: zip -qq -r lambdatest.zip output/*
 
       - name: provision Lambda
         run: | 
-              cp ./output/lambdatest.zip ./terraform/lambdatest.zip
+              cp ./lambdatest.zip ./terraform/lambdatest.zip
               cd terraform 
               terraform init
               export TF_VAR_access_key="${{secrets.ACCESS_KEY}}"
