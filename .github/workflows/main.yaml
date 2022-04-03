@@ -95,7 +95,7 @@ jobs:
       - name: Set up JDK
         uses: graalvm/setup-graalvm@v1
         with:
-          version:  '21.3.0'
+          version:  latest
           java-version: '17'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -107,10 +107,16 @@ jobs:
              
       - name: Integration-test java application 
         run: |
-              mvn clean package -DskipTests -P "spring-native,build-native-image"
-              .\target\com.example.demo.demoapplication.exe &
+              mvn clean package -DskipTests -Pspring-native,build-native-image
+              ./target/com.example.demo.demoapplication &
               sleep 10
               mvn test -Pfunctional-test
+              
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: demoapplication-ubuntu-latest
+          path: target/com.example.demo.demoapplication*  
         
     
 
